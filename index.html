@@ -1155,7 +1155,7 @@ function App(){
   const respondedCount = state.members.filter(m=>m.responded).length;
   const recs = recommend(state.members);
 
-  const attendeeScreens = ["invite","availability","prefs","anon","done"];
+  const attendeeScreens = ["invite","availability","prefs","done"];
   const hasSwitcher = attendeeScreens.includes(screen);
 
   return (
@@ -1180,7 +1180,6 @@ function App(){
       {screen==="invite"       && <ScreenInvite {...{state,activeMember,go,back}}/>}
       {screen==="availability" && <ScreenAvailability {...{state,dispatch,activeMember,go,back}}/>}
       {screen==="prefs"        && <ScreenPrefs {...{state,dispatch,activeMember,go,back}}/>}
-      {screen==="anon"         && <ScreenAnon {...{activeMember,state,go,back}}/>}
       {screen==="done"         && <ScreenDone {...{activeMember,state,reset,go}}/>}
 
       {/* 참석자 시점 스위처 (참석자 플로우에서만) */}
@@ -1857,7 +1856,7 @@ function ScreenPrefs({state,dispatch,activeMember,go,back}){
     const prefs=[...sel];
     if(hasOut && days.size>0) prefs.push(`outwork:${[...days].join(",")}`);
     dispatch({type:"SET_PREFS",id:me.id,prefs});
-    go(me.responded && !state.anonSeen ? "anon" : "anon"); // 최초 1회 안내
+    go("done"); // 익명 안심 + 완료를 한 화면으로 병합
   };
 
   const items=[
@@ -1907,35 +1906,9 @@ function ScreenPrefs({state,dispatch,activeMember,go,back}){
   );
 }
 
-/* ── 09 익명 안내 ── */
-function ScreenAnon({activeMember,state,go,back}){
-  const me=state.members[activeMember];
-  const lunch = state.members.filter(m=>m.prefs.includes("lunch")).length;
-  return (
-    <>
-      <AppBar onBack={back}/>
-      <div className="screen fade">
-        <div className="pad" style={{paddingTop:20}}>
-          <h1 className="title" style={{textAlign:"center"}}>당신의 선호는<br/>안전해요</h1>
-          <p className="sub" style={{textAlign:"center"}}>누가 어떤 시간을 피하고 싶은지는<br/>아무에게도 안 보여요.</p>
-
-          <div className="summary-card" style={{marginTop:20}}>
-            <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginBottom:8}}>주최자에게는 이렇게만 보여요</div>
-            <div style={{fontSize:17,fontWeight:800}}>
-              {state.members.length}명 중 {lunch||3}명이<br/>점심 직후를 피하고 싶어해요</div>
-          </div>
-        </div>
-      </div>
-      <div className="footer">
-        <button className="btn" onClick={()=>go("done")}>확인했어요</button>
-      </div>
-    </>
-  );
-}
-
-/* ── 10 완료 (참석자) ── */
+/* ── 09 완료 + 익명 안심 (병합) ── */
 function ScreenDone({activeMember,state,reset,go}){
-  const me=state.members[activeMember];
+  const lunch = state.members.filter(m=>m.prefs.includes("lunch")).length;
   return (
     <div className="screen fade">
       <div className="center-screen">
@@ -1943,10 +1916,18 @@ function ScreenDone({activeMember,state,reset,go}){
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
         <h1 className="title" style={{textAlign:"center"}}>다 알려줬어요,<br/>고마워요</h1>
-        <p className="sub" style={{textAlign:"center"}}>
-          시간이 정해지면 바로 알림을 보낼게요.</p>
-        <button className="linkbtn" style={{marginTop:6}} onClick={()=>go("availability")}>입력을 바꾸고 싶으면 여기를 눌러요</button>
-        <button className="btn ghost" style={{marginTop:24}} onClick={()=>reset("dashboard")}>
+
+        <div className="summary-card" style={{width:"100%",textAlign:"left",marginTop:4,marginBottom:20}}>
+          <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginBottom:8}}>주최자에게는 이렇게만 보여요</div>
+          <div style={{fontSize:17,fontWeight:800,lineHeight:1.45}}>
+            {state.members.length}명 중 {lunch||3}명이<br/>점심 직후를 피하고 싶어해요</div>
+          <div style={{fontSize:13,fontWeight:800,color:"var(--blue)",marginTop:10}}>'누가'는 없고, '얼마나'만 있어요</div>
+        </div>
+
+        <p className="sub" style={{textAlign:"center",margin:"0 0 4px"}}>
+          시간이 정해지면 바로 알림을 보낼게요.<br/>그때까진 신경 안 쓰셔도 돼요.</p>
+        <button className="linkbtn" onClick={()=>go("availability")}>입력을 바꾸고 싶으면 여기를 눌러요</button>
+        <button className="btn ghost" style={{marginTop:20}} onClick={()=>reset("dashboard")}>
           주최자 화면으로 (데모)</button>
       </div>
     </div>
