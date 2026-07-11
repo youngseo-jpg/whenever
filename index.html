@@ -332,21 +332,100 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
     --blue-tint:   #F2F7FF;
     --ink:         #191F28;
     --ink-2:       #4E5968;
-    --ink-3:       #8B95A1;
+    --ink-3:       #6B7684;   /* was #8B95A1 (3.04) → 4.5:1 통과 */
     --line:        #E5E8EB;
     --line-2:      #F2F4F6;
     --bg:          #FFFFFF;
     --bg-soft:     #F9FAFB;
-    --warn:        #F0A500;
+    --warn:        #F0A500;   /* 아이콘/그래픽 전용(텍스트 금지) */
+    --warn-ink:    #8F6300;   /* warn 텍스트 전용 — 흰색/warn-sub 모두 AA */
     --warn-sub:    #FFF7E6;
-    --good:        #15B76E;
+    --good:        #15B76E;   /* 아이콘/링 전용 */
+    --good-ink:    #0C7D4A;   /* good 텍스트 전용 — 흰색/good-sub 모두 AA */
     --good-sub:    #E7F8F0;
+    --danger:      #F04452;
+
+    /* 익명 배너 전용 (라이트: 어두운 칩 + 흰 텍스트) */
+    --anon-bg:     #191F28;
+    --anon-ink:    #FFFFFF;
+
+    /* 타이포 스케일(고정 토큰) */
+    --fs-eyebrow:  13px;
+    --fs-label:    14px;
+    --fs-body:     15px;
+    --fs-body-lg:  16px;
+    --fs-input:    17px;
+    --fs-title:    26px;
+    --fs-num:      22px;
+    --lh-tight:    1.32;
+    --lh-body:     1.6;
+    --ls-title:    -.6px;
+    --ls-num:      -.5px;
+
+    /* 8pt 스페이싱 스케일 */
+    --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+    --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px;
+    --tap: 44px;  /* 최소 터치 타깃 */
+
+    --radius-sm:   12px;
     --radius:      20px;
     --radius-lg:   28px;
     --shadow:      0 6px 24px rgba(23,31,40,.10);
     --shadow-sm:   0 2px 10px rgba(23,31,40,.06);
     --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
             "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ── 다크모드 (3단계 토글: 시스템→라이트→다크) ──
+     기본값은 "system": OS 설정을 따른다.
+     명시적 data-theme="dark" 이거나, "system"인데 OS가 다크일 때 적용. */
+  :root[data-theme="dark"],
+  :root[data-theme="system"]{
+    /* system일 때는 아래 @media 가 실제로 값을 켠다 (라이트가 기본) */
+  }
+  :root[data-theme="dark"]{
+    --blue:      #4B93F8;
+    --blue-dk:   #8FBAFB;   /* 어두운 배경 위 텍스트용으로 밝게 */
+    --blue-sub:  #1B2A45;
+    --blue-tint: #16233B;
+    --ink:       #EDEFF2;
+    --ink-2:     #B0B8C1;
+    --ink-3:     #8A95A1;   /* 어두운 배경 대비 확보 */
+    --line:      #2A2F37;
+    --line-2:    #222731;
+    --bg:        #16181D;
+    --bg-soft:   #1D2027;
+    --warn-ink:  #F2C14E;
+    --good-ink:  #4FD99A;
+    --warn-sub:  #33290F;
+    --good-sub:  #12331F;
+    --anon-bg:   #2A3646;
+    --anon-ink:  #EAF1FB;
+    --shadow:    0 6px 24px rgba(0,0,0,.5);
+    --shadow-sm: 0 2px 10px rgba(0,0,0,.4);
+  }
+  @media (prefers-color-scheme: dark){
+    :root[data-theme="system"]{
+      --blue:      #4B93F8;
+      --blue-dk:   #8FBAFB;
+      --blue-sub:  #1B2A45;
+      --blue-tint: #16233B;
+      --ink:       #EDEFF2;
+      --ink-2:     #B0B8C1;
+      --ink-3:     #8A95A1;
+      --line:      #2A2F37;
+      --line-2:    #222731;
+      --bg:        #16181D;
+      --bg-soft:   #1D2027;
+      --warn-ink:  #F2C14E;
+      --good-ink:  #4FD99A;
+      --warn-sub:  #33290F;
+      --good-sub:  #12331F;
+      --anon-bg:   #2A3646;
+      --anon-ink:  #EAF1FB;
+      --shadow:    0 6px 24px rgba(0,0,0,.5);
+      --shadow-sm: 0 2px 10px rgba(0,0,0,.4);
+    }
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; padding:0; }
@@ -385,23 +464,42 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
   .statusbar .dots{ display:flex; gap:5px; align-items:center; }
 
+  /* ── 테마 토글 (앱바 밴드 우상단 고정 · 모든 화면 공통) ── */
+  .theme-toggle{
+    position:absolute; top:56px; right:16px; z-index:65;
+    width:var(--tap); height:var(--tap); border-radius:50%;
+    border:1.5px solid var(--line); background:var(--bg-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px; padding:0; line-height:1;
+    box-shadow:var(--shadow-sm); transition:transform .12s, background .2s, border-color .2s;
+  }
+  .theme-toggle:active{ transform:scale(.9); }
+
+  /* 테마 전환 시 색상만 부드럽게 (레이아웃/transform 애니메이션엔 영향 없음) */
+  .phone, .phone *:not(.checkmark):not(.checkmark *){
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: .25s;
+    transition-timing-function: ease;
+  }
+
   /* ── 스크롤 영역 ── */
   .screen{ flex:1; overflow-y:auto; overflow-x:hidden; position:relative; -webkit-overflow-scrolling:touch; }
   .screen::-webkit-scrollbar{ width:0; }
   .pad{ padding:8px 24px 140px; }
 
   /* ── 상단 앱바 ── */
-  .appbar{ display:flex; align-items:center; gap:6px; height:52px; padding:0 20px; }
+  .appbar{ display:flex; align-items:center; gap:6px; height:52px; padding:0 72px 0 20px; }
   .appbar .back{
-    width:40px;height:40px;border-radius:50%;border:none;background:transparent;
+    width:44px;height:44px;border-radius:50%;border:none;background:transparent;
     display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:var(--ink);
-    margin-left:-8px;
+    margin-left:-10px;
   }
   .appbar .back:active{ background:var(--line-2); }
   .appbar .spacer{ flex:1; }
   .demo-chip{
-    font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-sub);
-    border:none;border-radius:999px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;
+    font-size:12px;font-weight:700;color:var(--blue-dk);background:var(--blue-sub);
+    border:none;border-radius:999px;padding:0 14px;min-height:var(--tap);cursor:pointer;
+    display:flex;align-items:center;gap:5px;
   }
   .demo-chip:active{ transform:scale(.96); }
 
@@ -438,7 +536,7 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   /* ── 하단 고정 버튼 ── */
   .footer{
     position:absolute; left:0; right:0; bottom:0; padding:14px 24px 30px;
-    background:linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 26%);
+    background:linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--bg) 26%);
     z-index:40;
   }
   /* 참석자 플로우: 하단 스위처(약 92px) 위로 footer를 띄운다 */
@@ -452,10 +550,11 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .btn:active{ transform:scale(.985); background:var(--blue-dk); }
   .btn:disabled{ background:var(--line); color:var(--ink-3); cursor:default; }
   .btn.ghost{ background:var(--blue-sub); color:var(--blue-dk); }
-  .btn.line{ background:#fff; color:var(--ink-2); border:1.5px solid var(--line); }
+  .btn.line{ background:var(--bg); color:var(--ink-2); border:1.5px solid var(--line); }
 
-  .linkbtn{ background:none;border:none;color:var(--ink-3);font-size:14px;font-weight:700;
-    cursor:pointer;font-family:var(--font);text-decoration:underline;text-underline-offset:3px; }
+  .linkbtn{ background:none;border:none;color:var(--ink-2);font-size:14px;font-weight:700;
+    cursor:pointer;font-family:var(--font);text-decoration:underline;text-underline-offset:3px;
+    min-height:var(--tap);padding:0 6px;display:inline-flex;align-items:center; }
 
   /* ── 참석자 행 ── */
   .prow{ display:flex; align-items:center; gap:13px; padding:14px 0; }
@@ -466,12 +565,12 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .prow .nm{ flex:1; font-size:16px; font-weight:700; }
   .prow .rl{ font-size:13px; color:var(--ink-3); font-weight:600; margin-top:2px; }
 
-  .seg{ display:flex; background:var(--line-2); border-radius:12px; padding:3px; gap:2px; }
+  .seg{ display:flex; background:var(--line-2); border-radius:12px; padding:3px; gap:2px; align-items:center; }
   .seg button{
-    border:none;background:transparent;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:800;
-    color:var(--ink-3);cursor:pointer;font-family:var(--font);transition:all .15s;
+    border:none;background:transparent;padding:0 16px;min-height:38px;border-radius:10px;font-size:13px;font-weight:800;
+    color:var(--ink-2);cursor:pointer;font-family:var(--font);transition:all .15s;
   }
-  .seg button.on{ background:#fff; color:var(--blue-dk); box-shadow:var(--shadow-sm); }
+  .seg button.on{ background:var(--bg); color:var(--blue-dk); box-shadow:var(--shadow-sm); }
 
   .counter{
     display:inline-flex; gap:8px; background:var(--bg-soft); border-radius:12px;
@@ -486,14 +585,15 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   /* ── 상태 리스트 ── */
   .srow{ display:flex; align-items:center; gap:13px; padding:15px 0; border-bottom:1px solid var(--line-2); }
   .badge{ font-size:12px; font-weight:800; padding:6px 11px; border-radius:999px; }
-  .badge.done{ background:var(--good-sub); color:var(--good); }
+  .badge.done{ background:var(--good-sub); color:var(--good-ink); }
   .badge.wait{ background:var(--line-2); color:var(--ink-3); }
   .nudge{
-    border:1.5px solid var(--line); background:#fff; color:var(--blue-dk);
-    border-radius:12px; padding:8px 13px; font-size:13px; font-weight:800; cursor:pointer; font-family:var(--font);
+    border:1.5px solid var(--line); background:var(--bg); color:var(--blue-dk);
+    border-radius:12px; padding:0 15px; min-height:var(--tap); font-size:13px; font-weight:800;
+    cursor:pointer; font-family:var(--font);
   }
   .nudge:active{ transform:scale(.95); }
-  .nudge.sent{ border-color:var(--good-sub); background:var(--good-sub); color:var(--good); }
+  .nudge.sent{ border-color:var(--good-sub); background:var(--good-sub); color:var(--good-ink); }
 
   .banner{
     background:var(--blue-tint); border-radius:16px; padding:16px 18px; margin-top:22px;
@@ -504,22 +604,26 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   /* ── 추천 카드 ── */
   .rcard{
     border:1.5px solid var(--line); border-radius:var(--radius-lg); padding:22px 20px; margin-bottom:14px;
-    background:#fff; transition:transform .12s, box-shadow .2s, border-color .2s;
+    background:var(--bg); transition:transform .12s, box-shadow .2s, border-color .2s;
   }
   .rcard.top{ border:2px solid var(--blue); box-shadow:0 10px 30px rgba(49,130,246,.16); }
   .rcard .rank{ font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.3px;margin-bottom:8px; }
   .rcard .when{ font-size:22px; font-weight:800; letter-spacing:-.5px; }
   .pill{ font-size:12px;font-weight:800;padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:4px; }
   .pill.best{ background:var(--blue-sub); color:var(--blue-dk); }
-  .pill.warn{ background:var(--warn-sub); color:#B47B00; }
+  .pill.warn{ background:var(--warn-sub); color:var(--warn-ink); }
   .reasons{ margin:16px 0 4px; display:flex; flex-direction:column; gap:11px; }
   .reason{ display:flex; align-items:flex-start; gap:9px; font-size:14.5px; font-weight:600; color:var(--ink-2); line-height:1.45; }
   .reason .ic{ flex:0 0 20px; font-size:15px; margin-top:1px; }
   .reason.ok .ic{ color:var(--good); }
-  .reason.no .ic{ color:var(--warn); }
-  .minibar{ display:flex; gap:3px; margin-top:14px; align-items:flex-end; height:38px; }
-  .minibar .b{ flex:1; background:var(--blue-sub); border-radius:4px 4px 2px 2px; transition:height .4s; position:relative; }
+  .reason.no .ic{ color:var(--warn-ink); }
+  .minibar{ display:flex; gap:6px; margin-top:0; align-items:flex-end; }
+  .minibar .col{ flex:1; display:flex; flex-direction:column; align-items:stretch; }
+  .minibar .track{ height:64px; display:flex; align-items:flex-end; }
+  .minibar .b{ width:100%; min-height:6px; background:var(--blue-sub);
+    border-radius:6px 6px 3px 3px; transition:height .45s cubic-bezier(.2,.8,.2,1); }
   .minibar .b.hi{ background:var(--blue); }
+  .minibar .lbl{ font-size:11px; font-weight:700; text-align:center; margin-top:7px; }
   .rcard .cta{
     margin-top:18px;width:100%;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:800;
     background:var(--blue);color:#fff;cursor:pointer;font-family:var(--font);transition:transform .1s;
@@ -527,101 +631,52 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .rcard.top .cta:active{ transform:scale(.98); }
   .rcard:not(.top) .cta{ background:var(--blue-sub); color:var(--blue-dk); }
 
-  /* ── 왜 이 순위인지(자연어 근거) ── */
-  .prov-dot{ margin-left:6px; font-size:10px; font-weight:800; color:#B47B00;
-    background:var(--warn-sub); padding:2px 6px; border-radius:999px; vertical-align:middle; }
-  .why{ margin-top:14px; padding:13px 14px; border-radius:14px; background:var(--bg-soft);
-    border:1px solid var(--line); }
-  .why.top{ background:var(--blue-tint); border-color:var(--blue-sub); }
-  .why-head{ font-size:11.5px; font-weight:800; color:var(--ink-3); letter-spacing:.2px; }
-  .why-tags{ display:flex; flex-wrap:wrap; gap:6px; margin:9px 0 10px; }
-  .wtag{ font-size:12px; font-weight:800; padding:4px 9px; border-radius:8px; line-height:1.3; }
-  .wtag.up{ background:var(--good-sub); color:var(--good); }
-  .wtag.down{ background:var(--warn-sub); color:#B47B00; }
-  .why-verdict{ font-size:13.5px; font-weight:700; color:var(--ink-2); line-height:1.5; }
-  .why-verdict b{ color:var(--blue-dk); white-space:nowrap; }
-  .why-vs{ margin-top:8px; font-size:12.5px; font-weight:700; color:var(--ink-3);
-    padding-top:8px; border-top:1px dashed var(--line); }
-
-  /* 펼침: 점수 요소 분해 */
-  .factors{ margin-top:16px; }
-  .factors-h{ font-size:12px; font-weight:800; color:var(--ink-3); margin-bottom:9px; }
-  .factor{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
-    padding:8px 11px; border-radius:10px; margin-bottom:6px; }
-  .factor.up{ background:var(--good-sub); color:#0E7A4A; }
-  .factor.down{ background:var(--warn-sub); color:#B47B00; }
-  .factor .fdir{ font-size:11px; }
-  .factor .ft{ flex:1; }
-  .factor .fw{ font-size:11px; font-weight:800; opacity:.85; }
-
-  /* 데모 미리보기 토글 */
-  .scen{ display:flex; gap:6px; background:var(--bg-soft); padding:4px; border-radius:12px; margin:6px 0 18px; }
-  .scen-b{ flex:1; border:none; background:none; padding:8px 6px; border-radius:9px; cursor:pointer;
-    font-family:var(--font); font-size:11.5px; font-weight:800; color:var(--ink-3); transition:all .15s; }
-  .scen-b.on{ background:#fff; color:var(--blue-dk); box-shadow:var(--shadow-sm); }
-
-  /* 잠정(미응답) 배너 */
-  .provbox{ background:var(--warn-sub); border:1px solid #F5D98A; border-radius:16px;
-    padding:14px 16px; margin-bottom:16px; }
-  .pv-h{ font-size:13.5px; font-weight:800; color:#8A6100; line-height:1.5; }
-  .pv-h b{ color:#B47B00; }
-  .pv-list{ display:flex; flex-wrap:wrap; gap:7px; margin:11px 0 8px; }
-  .pv-chip{ display:inline-flex; align-items:center; gap:6px; background:#fff; border-radius:999px;
-    padding:4px 11px 4px 4px; font-size:12.5px; font-weight:800; color:var(--ink-2); }
-  .pv-sub{ font-size:12px; font-weight:600; color:#8A6100; }
-
-  /* 한 사람만 조정되면 열리는 시간 */
-  .nmbox{ border:1.5px dashed var(--blue-sub); border-radius:16px; padding:16px; margin:4px 0 14px; background:var(--blue-tint); }
-  .nmbox-h{ font-size:14px; font-weight:800; color:var(--blue-dk); }
-  .nmbox-sub{ font-size:12.5px; font-weight:600; color:var(--ink-3); margin:4px 0 12px; }
-  .nearmiss{ display:flex; align-items:center; justify-content:space-between; gap:10px;
-    background:#fff; border-radius:12px; padding:11px 12px; margin-bottom:8px; }
-  .nm-left{ display:flex; align-items:center; gap:10px; }
-  .nm-when{ font-size:12px; font-weight:800; color:var(--blue); }
-  .nm-body{ font-size:13.5px; font-weight:700; color:var(--ink-2); line-height:1.4; margin-top:2px; }
-  .nm-body b{ color:var(--ink); }
-  .nm-btn{ flex:0 0 auto; border:1.5px solid var(--blue-sub); background:#fff; color:var(--blue-dk);
-    font-family:var(--font); font-size:12px; font-weight:800; padding:8px 12px; border-radius:10px; cursor:pointer; }
-  .nm-btn:active{ transform:scale(.96); }
-
-  /* 마감 도달 결정 화면 */
-  .decision{ border:2px solid var(--warn); border-radius:18px; padding:18px; margin-bottom:18px; background:var(--warn-sub); }
-  .dec-h{ font-size:16px; font-weight:800; color:#8A6100; }
-  .dec-list{ display:flex; flex-wrap:wrap; gap:7px; margin:11px 0; }
-  .dec-body{ font-size:13.5px; font-weight:700; color:#8A6100; margin:4px 0 14px; }
-  .dec-btn{ display:block; width:100%; border:1.5px solid #F0D08A; background:#fff; color:var(--ink);
-    font-family:var(--font); font-size:14px; font-weight:800; padding:14px; border-radius:13px;
-    cursor:pointer; margin-bottom:9px; transition:transform .1s; text-align:left; }
-  .dec-btn:active{ transform:scale(.985); }
-  .dec-btn.primary{ background:var(--warn); border-color:var(--warn); color:#fff; }
-  .dec-preview-h{ font-size:12.5px; font-weight:800; color:var(--ink-3); margin:2px 0 12px; }
-
-  /* 응답 0건 빈 상태 */
-  .emptyrec{ text-align:center; padding:34px 18px 24px; }
-  .er-emoji{ font-size:44px; }
-  .er-h{ font-size:17px; font-weight:800; color:var(--ink); margin:14px 0 8px; }
-  .er-b{ font-size:14px; font-weight:600; color:var(--ink-3); line-height:1.6; max-width:280px; margin:0 auto; }
-
   /* ── 그리드(가용시간) ── */
+  .selectall-row{ display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:12px; }
+  .selectall-count{ font-size:13px; font-weight:700; color:var(--ink-3); }
+  .selectall-btn{
+    position:relative; border:1.5px solid var(--line); background:var(--bg); color:var(--blue-dk);
+    border-radius:10px; padding:7px 13px; font-size:13px; font-weight:700;
+    cursor:pointer; font-family:var(--font); transition:transform .1s, background .15s, border-color .15s;
+  }
+  .selectall-btn::after{ content:""; position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%); min-width:44px; min-height:44px; width:100%; height:100%; }
+  .selectall-btn:active{ transform:scale(.96); }
+  .selectall-btn.on{ border-color:var(--blue); background:var(--blue-sub); }
   .grid-scroll{ overflow-x:auto; padding-bottom:6px; }
   .grid{ display:grid; grid-template-columns:34px repeat(5, 1fr); gap:5px; min-width:320px; }
-  .gcell{ height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  .gcell{ height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center;
     font-size:12px; font-weight:700; }
+  .gcell.head, .gcell.time{ height:28px; }  /* 헤더/시간 라벨은 비대화형이라 낮게 */
   .gcell.head{ color:var(--ink-3); font-weight:800; }
   .gcell.time{ color:var(--ink-3); font-size:11px; }
   .gcell.slot{ background:var(--bg-soft); cursor:pointer; border:1.5px solid transparent; transition:all .1s; }
   .gcell.slot.on{ background:var(--blue); color:#fff; }
   .gcell.slot:active{ transform:scale(.9); }
 
+  /* ── 직접 찾기 그리드(가용 인원 히트맵) ── */
+  .mgrid-scroll{ overflow-x:auto; padding-bottom:6px; margin-top:4px; }
+  .mgrid{ display:grid; grid-template-columns:64px repeat(5, 1fr); gap:6px; min-width:340px; }
+  .mcell{ display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+  .mcell.head{ height:28px; color:var(--ink-3); font-weight:800; }
+  .mcell.time{ height:52px; color:var(--ink-3); font-size:11px; justify-content:flex-start; }
+  .mcell.slot{ height:52px; border-radius:12px; cursor:pointer; border:2px solid transparent;
+    background:var(--bg-soft); transition:transform .1s, border-color .15s; padding:0; }
+  .mcell.slot .mnum{ font-size:15px; font-weight:800; }
+  .mcell.slot:active{ transform:scale(.92); }
+  .mcell.slot.on{ background:var(--blue); border-color:var(--blue-dk); }
+  .mgrid-legend{ font-size:12px; font-weight:600; color:var(--ink-3); margin:12px 0 0; }
+
   /* ── 익명 배너 ── */
   .anon{
-    background:var(--ink); color:#fff; border-radius:14px; padding:13px 16px; font-size:13.5px; font-weight:700;
+    background:var(--anon-bg); color:var(--anon-ink); border-radius:14px; padding:13px 16px; font-size:13.5px; font-weight:700;
     display:flex; align-items:center; gap:8px; position:sticky; top:0; z-index:20; margin-bottom:6px;
   }
 
   /* ── 선호 칩(세로) ── */
   .pchip{
-    width:100%; text-align:left; border:1.5px solid var(--line); background:#fff; border-radius:16px;
+    width:100%; text-align:left; border:1.5px solid var(--line); background:var(--bg); border-radius:16px;
     padding:17px 18px; font-size:15.5px; font-weight:700; color:var(--ink-2); cursor:pointer;
     font-family:var(--font); transition:all .15s; display:flex; align-items:center; justify-content:space-between; gap:10px;
     margin-bottom:10px;
@@ -633,7 +688,7 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .pchip.on .chk{ background:var(--blue); border-color:var(--blue); }
 
   .subdays{ display:flex; gap:7px; margin:-2px 0 10px; padding-left:2px; }
-  .dchip{ width:38px;height:38px;border-radius:11px;border:1.5px solid var(--line);background:#fff;
+  .dchip{ width:38px;height:38px;border-radius:11px;border:1.5px solid var(--line);background:var(--bg);
     font-size:13px;font-weight:800;color:var(--ink-2);cursor:pointer;font-family:var(--font); }
   .dchip.on{ border-color:var(--blue); background:var(--blue); color:#fff; }
 
@@ -658,26 +713,15 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .fade{ animation:fade .32s ease; }
   @keyframes fade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
 
-  /* 익명 애니메이션 */
-  .scatter{ position:relative; height:130px; margin:10px 0 24px; }
-  .name-tag{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    background:var(--ink); color:#fff; padding:8px 16px; border-radius:12px; font-weight:800; font-size:15px;
-    animation:dissolve 2.4s ease infinite; }
-  @keyframes dissolve{ 0%,20%{ opacity:1; } 55%,100%{ opacity:0; transform:translate(-50%,-70%); } }
-  .dots-anon{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    display:flex; gap:8px; opacity:0; animation:appear 2.4s ease infinite; }
-  @keyframes appear{ 0%,45%{ opacity:0; transform:translate(-50%,-30%); } 75%,100%{ opacity:1; transform:translate(-50%,-50%); } }
-  .anon-dot{ width:34px;height:34px;border-radius:11px;background:var(--blue-sub);border:2px solid var(--blue);
-    display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:800;font-size:13px; }
-
   .switcher{
-    position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
+    position:absolute; bottom:0; left:0; right:0; background:var(--bg); border-top:1px solid var(--line);
     padding:12px 16px 26px; z-index:70;
   }
   .switcher .lbl{ font-size:11px; font-weight:800; color:var(--ink-3); margin-bottom:9px; letter-spacing:.3px; text-align:center; }
   .switcher .row{ display:flex; gap:7px; overflow-x:auto; }
   .switcher .sbtn{
-    flex:0 0 auto; border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:9px 12px;
+    flex:0 0 auto; border:1.5px solid var(--line); background:var(--bg); border-radius:12px;
+    padding:0 14px; min-height:var(--tap);
     font-size:12px; font-weight:800; cursor:pointer; font-family:var(--font); display:flex; align-items:center; gap:6px;
     color:var(--ink-2); transition:all .15s;
   }
@@ -758,17 +802,15 @@ const PREF_DEFS = {
 function recommend(members){
   const req = members.filter(m=>m.required);
   const opt = members.filter(m=>!m.required);
-  const pending = members.filter(m=>!m.responded); // 마감/미완료 판단용
-  const all = [];
+  const results = [];
 
   for(const day of DAYS){
     for(const si in SLOTS){
       const slot = SLOTS[si];
       const key = `${day}-${si}`;
-      const reqOk   = req.filter(m=>m.avail.has(key));
-      const optOk   = opt.filter(m=>m.avail.has(key));
-      const reqMiss = req.filter(m=>!m.avail.has(key)); // 못 오는(또는 미응답) 필수
-      const reqAll  = reqOk.length === req.length && req.length>0;
+      const reqOk  = req.filter(m=>m.avail.has(key));
+      const optOk  = opt.filter(m=>m.avail.has(key));
+      const reqAll = reqOk.length === req.length;
 
       // 선호 위반 집계 (익명 — 숫자만)
       let prefHits = 0;
@@ -793,88 +835,19 @@ function recommend(members){
       score -= (opt.length-optOk.length)*15; // 선택 이탈 감점
       score -= prefHits*12;                   // 선호 위반 감점
 
-      all.push({
-        day, slot, key, reqOk, optOk, reqMiss, reqAll,
+      // 응답자가 아무도 안 되는 슬롯은 제외
+      if(reqOk.length+optOk.length===0) continue;
+
+      results.push({
+        day, slot, key, reqOk, optOk, reqAll,
         reqTotal:req.length, optTotal:opt.length,
         optMiss: opt.length-optOk.length,
-        prefHits, prefReasons, score,
-        empty: reqOk.length+optOk.length===0, // 아무도 안 되는 슬롯
+        prefReasons, score,
       });
     }
   }
-
-  const viable = all.filter(s=>!s.empty).sort((a,b)=>b.score-a.score);
-  const hasPerfect = viable.some(s=>s.reqAll);
-
-  // 차선: 필수 전원은 아니지만 가장 나은 슬롯
-  const bestImperfect = viable.filter(s=>!s.reqAll).slice(0,3);
-
-  // "한 사람만 조정되면 열리는 시간" — 필수가 정확히 1명만 빠지는 슬롯
-  const nearMisses = all
-    .filter(s=>!s.empty && s.reqMiss.length===1)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,3);
-
-  return {
-    recs: viable.slice(0,3),
-    hasAny: viable.length>0,
-    hasPerfect,
-    bestImperfect,
-    nearMisses,
-    pending,                                  // 미응답자(마감/잠정 판단)
-    reqTotal: req.length,
-    respondedCount: members.length - pending.length,
-    totalCount: members.length,
-    emptySlotCount: all.filter(s=>s.empty).length, // 아무도 응답/가능 안 한 슬롯 수
-  };
-}
-
-/* ── 점수 → 사람이 읽는 문장으로 번역 ── */
-// 이 시간 자체가 왜 좋은가(절대 근거): 장점/단점 목록
-function rationaleFor(r){
-  const pros=[], cons=[];
-  if(r.reqAll)                       pros.push(`필수 ${r.reqTotal}명 전원 가능`);
-  if(r.optTotal>0 && r.optMiss===0)  pros.push(`선택 ${r.optTotal}명도 전원 가능`);
-  if(r.prefHits===0)                 pros.push(`피하고 싶어 한 시간에 안 걸림`);
-
-  if(!r.reqAll)      cons.push(`필수 ${r.reqMiss.length}명이 이 시간엔 안 돼요`);
-  if(r.optMiss>0)    cons.push(`선택 ${r.optMiss}명이 빠져요`);
-  if(r.prefHits>0)   cons.push(`선호 ${r.prefHits}건과 겹쳐요`);
-
-  if(pros.length===0) pros.push(`지금 가장 많은 사람이 모일 수 있는 시간`);
-  return {pros, cons};
-}
-// 최종 한 문장: "…… → 그래서 N순위"
-function rationaleSentence(r, rank){
-  const {pros,cons} = rationaleFor(r);
-  const body = pros.join(" + ") + (cons.length? ` · 다만 ${cons.join(", ")}` : "");
-  return `${body} → 그래서 ${rank}순위`;
-}
-// 왜 1순위가 아닌가(상대 근거): 탑과의 차이
-function rankVsTop(r, top){
-  if(!top || r.key===top.key) return null;
-  const d=[];
-  const reqGap = top.reqOk.length - r.reqOk.length;
-  if(reqGap>0)  d.push(`필수가 ${reqGap}명 덜 와요`);
-  const optGap = r.optMiss - top.optMiss;
-  if(optGap>0)  d.push(`선택이 ${optGap}명 더 빠져요`);
-  const prefGap = r.prefHits - top.prefHits;
-  if(prefGap>0) d.push(`선호 충돌이 ${prefGap}건 더 있어요`);
-  if(d.length===0) return `1순위와 조건은 거의 같지만 근소하게 뒤예요`;
-  return `1순위보다 ${d.join(", ")}`;
-}
-// 점수를 움직인 요소 분해(펼침 뷰) — 날 숫자 대신 방향·세기로
-function factorBreakdown(r){
-  const f=[];
-  if(r.reqAll) f.push({t:"필수 전원 가능", dir:"up", w:"결정적 가점"});
-  else         f.push({t:`필수 ${r.reqOk.length}/${r.reqTotal}명 가능`, dir: r.reqOk.length? "up":"down", w:"핵심 요소"});
-  if(r.optTotal>0){
-    if(r.optMiss===0) f.push({t:"선택 전원 참석", dir:"up", w:"가점"});
-    else              f.push({t:`선택 ${r.optMiss}명 불참`, dir:"down", w:"감점"});
-  }
-  if(r.prefHits>0) f.push({t:`선호 충돌 ${r.prefHits}건`, dir:"down", w:"감점"});
-  else             f.push({t:"선호 충돌 없음", dir:"up", w:"가점"});
-  return f;
+  results.sort((a,b)=>b.score-a.score);
+  return results.slice(0,3);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -992,10 +965,24 @@ function App(){
   const [confirmed, setConfirmed] = useState(null);
   const [toast, setToast] = useState("");
 
+  // 테마: 기본값 "system"(OS 설정 따름). 토글로 system→light→dark→system 순환.
+  const [theme, setTheme] = useState("system");
+  useEffect(()=>{ document.documentElement.setAttribute("data-theme", theme); }, [theme]);
+  const THEME_ORDER = ["system","light","dark"];
+  const cycleTheme = ()=> setTheme(t=>{
+    const i = THEME_ORDER.indexOf(t);
+    return THEME_ORDER[(i+1)%THEME_ORDER.length];
+  });
+  const THEME_META = {
+    system: { icon:"🌗", label:"시스템 설정 따름 (탭하면 라이트 고정)" },
+    light:  { icon:"☀️", label:"라이트 모드 (탭하면 다크 고정)" },
+    dark:   { icon:"🌙", label:"다크 모드 (탭하면 시스템 설정으로)" },
+  };
+
   const showToast = (t)=>{ setToast(t); setTimeout(()=>setToast(""), 1900); };
 
   const respondedCount = state.members.filter(m=>m.responded).length;
-  const recData = recommend(state.members);
+  const recs = recommend(state.members);
 
   const attendeeScreens = ["invite","availability","prefs","anon","done"];
   const hasSwitcher = attendeeScreens.includes(screen);
@@ -1004,11 +991,17 @@ function App(){
     <div className={"phone"+(hasSwitcher?" has-switcher":"")}>
       <div className="notch"></div>
       <StatusBar/>
+      <button className="theme-toggle" onClick={cycleTheme}
+        aria-label={THEME_META[theme].label}
+        title={THEME_META[theme].label}>
+        {THEME_META[theme].icon}
+      </button>
 
       {screen==="setup"        && <ScreenSetup {...{state,dispatch,go,reset}}/>}
       {screen==="members"      && <ScreenMembers {...{state,dispatch,go,back}}/>}
       {screen==="dashboard"    && <ScreenDashboard {...{state,dispatch,go,back,respondedCount,setActiveMember,showToast}}/>}
-      {screen==="recommend"    && <ScreenRecommend {...{data:recData,state,go,back,setConfirmed,dispatch,showToast}}/>}
+      {screen==="recommend"    && <ScreenRecommend {...{recs,state,go,back,setConfirmed}}/>}
+      {screen==="manual"       && <ScreenManual {...{state,go,back,setConfirmed}}/>}
       {screen==="confirm"      && <ScreenConfirm {...{confirmed,state,reset,go}}/>}
 
       {/* 참석자 플로우 */}
@@ -1016,7 +1009,7 @@ function App(){
       {screen==="availability" && <ScreenAvailability {...{state,dispatch,activeMember,go,back}}/>}
       {screen==="prefs"        && <ScreenPrefs {...{state,dispatch,activeMember,go,back}}/>}
       {screen==="anon"         && <ScreenAnon {...{activeMember,state,go,back}}/>}
-      {screen==="done"         && <ScreenDone {...{activeMember,state,reset}}/>}
+      {screen==="done"         && <ScreenDone {...{activeMember,state,reset,go}}/>}
 
       {/* 참석자 시점 스위처 (참석자 플로우에서만) */}
       {hasSwitcher &&
@@ -1063,7 +1056,7 @@ function ScreenSetup({state,dispatch,go,reset}){
                 onClick={()=>dispatch({type:"SET_DEADLINE",v:d})}>{d}</button>
             ))}
           </div>
-          <p className="info-line" style={{color: isToday?"var(--warn)":"var(--ink-3)"}}>
+          <p className="info-line" style={{color: isToday?"var(--warn-ink)":"var(--ink-3)"}}>
             {isToday ? "⏰ 응답 시간이 짧아요. 정말 오늘까지인가요?"
                      : "🕒 이 시간까지 동료들의 응답을 모아요."}
           </p>
@@ -1171,7 +1164,7 @@ function ScreenDashboard({state,dispatch,go,back,respondedCount,setActiveMember,
 
           <div className="banner">
             <div className="bt">{all? "추천 시간이 준비됐어요" : "지금도 추천을 미리 볼 수 있어요"}</div>
-            <button className="linkbtn" style={{color:"var(--blue)"}} onClick={()=>go("recommend")}>
+            <button className="linkbtn" style={{color:"var(--blue-dk)"}} onClick={()=>go("recommend")}>
               {all?"추천 보기":"미리 보기"} ›</button>
           </div>
           <p className="info-line">🤝 미응답자 재촉은 무당이 대신해요. 기다리는 건 잘못이 아니에요.</p>
@@ -1186,262 +1179,186 @@ function ScreenDashboard({state,dispatch,go,back,respondedCount,setActiveMember,
 }
 
 /* ── 04 시스템 추천 3개 ⭐ ── */
-/* 추천 카드 하나 — "왜 이 순위인지"를 자연어로 노출 */
-function RecCard({r, i, top, open, setOpen, state, setConfirmed, go, provisional}){
-  const rank = i+1;
-  const {pros, cons} = rationaleFor(r);
-  const vs = rankVsTop(r, top);
-  const factors = factorBreakdown(r);
-  return (
-    <div className={"rcard"+(i===0?" top":"")} onClick={()=>setOpen(open===i?-1:i)}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <div className="rank">{rank}순위{provisional && <span className="prov-dot">잠정</span>}</div>
-          <div className="when">{r.day}요일 {slotLabel(r.slot)}</div>
-        </div>
-        {i===0
-          ? <span className="pill best">✨ 가장 잘 맞아요</span>
-          : (r.optMiss>0
-              ? <span className="pill warn">선택 {r.optMiss}명 빠져요</span>
-              : (r.prefHits>0
-                  ? <span className="pill warn">선호와 조금 안 맞아요</span>
-                  : <span className="pill best">잘 맞아요</span>))}
-      </div>
-
-      {/* ── 왜 이 순위인지: score를 사람이 읽는 문장으로 ── */}
-      <div className={"why"+(i===0?" top":"")}>
-        <div className="why-head">왜 {rank}순위일까요?</div>
-        <div className="why-tags">
-          {pros.map((p,idx)=><span className="wtag up" key={"p"+idx}>＋ {p}</span>)}
-          {cons.map((c,idx)=><span className="wtag down" key={"c"+idx}>－ {c}</span>)}
-        </div>
-        <div className="why-verdict">
-          {pros.join(" + ")}{cons.length? ` · 다만 ${cons.join(", ")}`:""}
-          {" "}<b>→ 그래서 {rank}순위</b>
-        </div>
-        {vs && <div className="why-vs">📊 {vs}</div>}
-      </div>
-
-      <div className="reasons">
-        <div className={"reason "+(r.reqAll?"ok":"no")}>
-          <span className="ic">{r.reqAll?"✓":"⚠️"}</span>
-          <span>필수 {r.reqOk.length}명{r.reqAll?" 전원":` / ${r.reqTotal}명`} 가능</span>
-        </div>
-        <div className={"reason "+(r.optMiss===0?"ok":"no")}>
-          <span className="ic">{r.optMiss===0?"✓":"⚠️"}</span>
-          <span>{r.optMiss===0
-            ? `선택 ${r.optOk.length}명도 모두 가능`
-            : `선택 ${r.optMiss}명 불참 (외근·일정)`}</span>
-        </div>
-        {r.prefReasons.length>0
-          ? r.prefReasons.map((pr,idx)=>(
-              <div className="reason no" key={idx}><span className="ic">⚠️</span><span>{pr}</span></div>))
-          : <div className="reason ok"><span className="ic">✓</span><span>피하고 싶어 한 시간에 안 걸려요</span></div>}
-      </div>
-
-      {open===i &&
-        <div className="fade">
-          <div className="factors">
-            <div className="factors-h">순위를 만든 요소</div>
-            {factors.map((f,idx)=>(
-              <div className={"factor "+f.dir} key={idx}>
-                <span className="fdir">{f.dir==="up"?"▲":"▼"}</span>
-                <span className="ft">{f.t}</span>
-                <span className="fw">{f.w}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginTop:16}}>요일별 가능 인원</div>
-          <MiniBar members={state.members} slot={r.slot} activeDay={r.day}/>
-        </div>}
-
-      <button className="cta" onClick={(e)=>{ e.stopPropagation(); setConfirmed(r); go("confirm"); }}>
-        이 시간으로 정하기
-      </button>
-    </div>
-  );
-}
-
-/* "한 사람만 조정되면 열리는 시간" 한 줄 */
-function NearMissRow({r, dispatch, showToast}){
-  const m = r.reqMiss[0];
-  const unresp = m && !m.responded;
-  return (
-    <div className="nearmiss">
-      <div className="nm-left">
-        {m && <Avatar m={m} size={34}/>}
-        <div>
-          <div className="nm-when">{r.day}요일 {slotLabel(r.slot)}</div>
-          <div className="nm-body">
-            {unresp
-              ? <><b>{m.name}</b>님 응답만 오면 필수 전원 가능</>
-              : <><b>{m? m.name : "1명"}</b>님만 빠지면 나머지 필수 전원 가능</>}
-          </div>
-        </div>
-      </div>
-      {m &&
-        <button className="nm-btn" onClick={(e)=>{ e.stopPropagation();
-          if(dispatch) dispatch({type:"NUDGE", id:m.id});
-          if(showToast) showToast(`${m.name}님께 콕 찔러뒀어요`); }}>
-          콕 찌르기
-        </button>}
-    </div>
-  );
-}
-
-function ScreenRecommend({data, state, go, back, setConfirmed, dispatch, showToast}){
-  const [open, setOpen] = useState(0);
-  const [scenario, setScenario] = useState("auto"); // auto | noperfect | deadline (미리보기)
-
-  const pending = data.pending;
-  const provisional = pending.length>0;                 // 미응답자 있으면 추천은 잠정값
-  const showDeadline  = scenario==="deadline";
-  const showNoPerfect = scenario==="noperfect" || (scenario==="auto" && data.hasAny && !data.hasPerfect);
-  // 완벽한 시간 없음 화면은 '차선(필수 미충족)' 목록을 보여줌
-  const list = showNoPerfect
-    ? (data.bestImperfect.length ? data.bestImperfect : data.recs)
-    : data.recs;
-  const top = list[0];
-
-  const title = showDeadline   ? "마감 시간이 지났어요"
-              : !data.hasAny   ? "아직 추천할 게 없어요"
-              : showNoPerfect  ? "딱 맞는 시간이 없었어요"
-              :                  "이 시간을 추천해요";
-  const sub   = showDeadline   ? "미응답자를 어떻게 처리할지 정하면 바로 확정할 수 있어요."
-              : !data.hasAny   ? "가능한 시간이 한 건이라도 들어오면 바로 만들어 드릴게요."
-              : showNoPerfect  ? "필수 전원이 되는 시간은 없었어요. 가장 가까운 차선과, 살짝만 조정하면 열리는 시간을 모았어요."
-              :                  "모두의 가능한 시간과 선호를 반영했어요. 이유까지 함께요.";
-
+function ScreenRecommend({recs,state,go,back,setConfirmed}){
   return (
     <>
-      <AppBar onBack={back} right={
-        <span style={{fontSize:12,fontWeight:800,color:"var(--ink-3)"}}>🧪 미리보기</span>}/>
+      <AppBar onBack={back}/>
       <div className="screen fade">
         <div className="pad">
           <p className="eyebrow">주최자</p>
-          <h1 className="title">{title}</h1>
-          <p className="sub">{sub}</p>
+          <h1 className="title">이 시간을 추천해요</h1>
+          <p className="sub">모두의 가능한 시간과 선호를 반영했어요. 이유까지 함께요.</p>
 
-          {/* 데모 미리보기 토글 — 세 가지 상태 확인용 */}
-          <div className="scen">
-            {[["auto","실제 상태"],["noperfect","완벽한 시간 없음"],["deadline","마감 도달"]].map(([v,lb])=>(
-              <button key={v} className={"scen-b"+(scenario===v?" on":"")}
-                onClick={()=>{ setScenario(v); setOpen(0); }}>{lb}</button>
-            ))}
-          </div>
-
-          {/* 미응답자 잠정 배너 (마감 도달 화면에선 아래 결정 박스로 대체) */}
-          {provisional && !showDeadline &&
-            <div className="provbox">
-              <div className="pv-h">⏳ 아직 {pending.length}명이 응답 전이에요 — 지금 추천은 <b>잠정값</b></div>
-              <div className="pv-list">
-                {pending.map(m=>(
-                  <span className="pv-chip" key={m.id}><Avatar m={m} size={22}/>{m.name}</span>
-                ))}
+          {recs.map((r,i)=>(
+            <div key={r.key} className={"rcard"+(i===0?" top":"")}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div>
+                  <div className="rank">{i===0?"1순위":`${i+1}순위`}</div>
+                  <div className="when">{r.day}요일 {slotLabel(r.slot)}</div>
+                </div>
+                {i===0
+                  ? <span className="pill best">✨ 가장 잘 맞아요</span>
+                  : (r.optMiss>0
+                      ? <span className="pill warn">선택 {r.optMiss}명 빠져요</span>
+                      : (r.prefReasons.length>0
+                          ? <span className="pill warn">선호와 조금 안 맞아요</span>
+                          : <span className="pill best">잘 맞아요</span>))}
               </div>
-              <div className="pv-sub">응답이 들어오면 순위가 바뀔 수 있어요.</div>
-            </div>}
 
-          {/* ── 상태별 본문 ── */}
-          {showDeadline
-            ? <DeadlineDecision {...{data, list, top, open, setOpen, state, setConfirmed, go, dispatch, showToast, setScenario}}/>
-            : !data.hasAny
-              ? <EmptyRecs {...{data, go, dispatch, showToast}}/>
-              : <>
-                  {list.map((r,i)=>(
-                    <RecCard key={r.key} {...{r,i,top,open,setOpen,state,setConfirmed,go,provisional}}/>
-                  ))}
+              <div className="reasons">
+                <div className={"reason "+(r.reqAll?"ok":"no")}>
+                  <span className="ic">{r.reqAll?"✓":"⚠️"}</span>
+                  <span>필수 {r.reqOk.length}명{r.reqAll?" 전원":` / ${r.reqTotal}명`} 가능</span>
+                </div>
+                <div className={"reason "+(r.optMiss===0?"ok":"no")}>
+                  <span className="ic">{r.optMiss===0?"✓":"⚠️"}</span>
+                  <span>{r.optMiss===0
+                    ? `선택 ${r.optOk.length}명도 모두 가능`
+                    : `선택 ${r.optMiss}명 불참 (외근·일정)`}</span>
+                </div>
+                {r.prefReasons.length>0
+                  ? r.prefReasons.map((pr,idx)=>(
+                      <div className="reason no" key={idx}><span className="ic">⚠️</span><span>{pr}</span></div>))
+                  : <div className="reason ok"><span className="ic">✓</span><span>피하고 싶어 한 시간에 안 걸려요</span></div>}
+              </div>
 
-                  {/* 완벽한 시간 없음: 한 사람만 조정되면 열리는 시간 */}
-                  {showNoPerfect && data.nearMisses.length>0 &&
-                    <div className="nmbox">
-                      <div className="nmbox-h">🔓 한 사람만 조정되면 열리는 시간</div>
-                      <div className="nmbox-sub">아래 한 명만 참석/응답하면 필수 전원이 모여요.</div>
-                      {data.nearMisses.map(r=>(
-                        <NearMissRow key={r.key} {...{r, dispatch, showToast}}/>
-                      ))}
-                    </div>}
-                </>}
+              <div className="minibar-wrap">
+                <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginTop:24,marginBottom:12}}>요일별 가능 인원</div>
+                <MiniBar members={state.members} slot={r.slot} activeDay={r.day}/>
+              </div>
 
-          {/* 아무도 응답/가능하지 않은 슬롯 안내 */}
-          {data.hasAny && data.emptySlotCount>0 &&
-            <p className="info-line" style={{justifyContent:"center"}}>
-              🕳️ {data.emptySlotCount}개 시간대는 아무도 안 돼서 후보에서 뺐어요.</p>}
+              <button className="cta" onClick={(e)=>{ e.stopPropagation(); setConfirmed(r); go("confirm"); }}>
+                이 시간으로 정하기
+              </button>
+            </div>
+          ))}
 
           <p className="info-line" style={{justifyContent:"center"}}>
             🔒 누가 어떤 선호를 골랐는지는 표시되지 않아요. 숫자만 보여요.</p>
-          {data.hasAny &&
-            <div style={{textAlign:"center",marginTop:8}}>
-              <button className="linkbtn">다른 시간도 직접 찾아볼래요</button>
-            </div>}
+          <div style={{textAlign:"center",marginTop:8}}>
+            <button className="linkbtn" onClick={()=>go("manual")}>다른 시간도 직접 찾아볼래요</button>
+          </div>
         </div>
       </div>
     </>
-  );
-}
-
-/* 마감 도달 — 미응답자 처리 결정 화면 */
-function DeadlineDecision({data, list, top, open, setOpen, state, setConfirmed, go, dispatch, showToast, setScenario}){
-  const pending = data.pending;
-  return (
-    <>
-      <div className="decision">
-        <div className="dec-h">아직 {pending.length}명이 응답하지 않았어요</div>
-        <div className="dec-list">
-          {pending.map(m=>(
-            <span className="pv-chip" key={m.id}><Avatar m={m} size={22}/>{m.name} · 미응답</span>
-          ))}
-        </div>
-        <div className="dec-body">마감이 지났어요. 어떻게 할까요?</div>
-        <button className="dec-btn primary" onClick={()=>{ setScenario("auto"); showToast&&showToast(`응답한 ${data.respondedCount}명 기준으로 추천을 확정해요`); }}>
-          지금까지 응답한 {data.respondedCount}명 기준으로 정하기
-        </button>
-        <button className="dec-btn" onClick={()=>{ showToast&&showToast("마감을 하루 연장했어요 · 무당이 계속 챙길게요"); }}>
-          마감을 하루 연장하고 더 기다리기
-        </button>
-        <button className="dec-btn" onClick={()=>{ pending.forEach(m=>dispatch&&dispatch({type:"NUDGE",id:m.id})); showToast&&showToast("미응답자에게 마지막으로 알렸어요"); }}>
-          미응답자에게 마지막으로 알리기
-        </button>
-      </div>
-
-      <div className="dec-preview-h">그래도 지금 데이터로는 이 시간이 유력해요</div>
-      {list.slice(0,1).map((r,i)=>(
-        <RecCard key={r.key} {...{r,i,top,open,setOpen,state,setConfirmed,go,provisional:true}}/>
-      ))}
-    </>
-  );
-}
-
-/* 응답 0건 — 빈 상태 */
-function EmptyRecs({data, go, dispatch, showToast}){
-  return (
-    <div className="emptyrec">
-      <div className="er-emoji">🗓️</div>
-      <div className="er-h">아직 아무도 가능한 시간을 내지 않았어요</div>
-      <div className="er-b">응답이 한 건이라도 들어오면 그 즉시 추천을 만들어 보여드릴게요. 그때까지 기다리는 건 잘못이 아니에요.</div>
-      <button className="btn ghost" style={{marginTop:6}}
-        onClick={()=>{ data.pending.forEach(m=>dispatch&&dispatch({type:"NUDGE",id:m.id})); showToast&&showToast("미응답자에게 살짝 알렸어요"); }}>
-        미응답자에게 알리기
-      </button>
-    </div>
   );
 }
 function MiniBar({members, slot, activeDay}){
   const si = SLOTS.indexOf(slot);
+  const counts = DAYS.map(d=> members.filter(m=>m.avail.has(`${d}-${si}`)).length);
+  const maxCnt = Math.max(1, ...counts); // 0으로 나눔 방지
   return (
     <div className="minibar">
-      {DAYS.map(d=>{
-        const cnt = members.filter(m=>m.avail.has(`${d}-${si}`)).length;
+      {DAYS.map((d,idx)=>{
+        const cnt = counts[idx];
+        // 인원 비례: 최다 인원이 트랙의 100%를 채우고, 0명은 바닥 스텁(min-height)만 보임
+        const pct = cnt===0 ? 0 : Math.round((cnt/maxCnt)*100);
+        const active = d===activeDay;
         return (
-          <div key={d} style={{textAlign:"center",flex:1}}>
-            <div style={{display:"flex",alignItems:"flex-end",height:38}}>
-              <div className={"b"+(d===activeDay?" hi":"")} style={{height:`${20+cnt*13}%`}}></div>
+          <div key={d} className="col">
+            <div className="track">
+              <div className={"b"+(active?" hi":"")} style={{height:`${pct}%`}}></div>
             </div>
-            <div style={{fontSize:11,fontWeight:700,color:d===activeDay?"var(--blue)":"var(--ink-3)",marginTop:5}}>{d} {cnt}</div>
+            <div className="lbl" style={{color: active?"var(--blue-dk)":"var(--ink-3)"}}>{d} {cnt}</div>
           </div>
         );
       })}
     </div>
+  );
+}
+
+/* ── 04-b 직접 시간 찾기 (주최자 수동 선택) ── */
+function ScreenManual({state,go,back,setConfirmed}){
+  const [pick,setPick]=useState(null); // {day, si}
+  const req = state.members.filter(m=>m.required);
+  const opt = state.members.filter(m=>!m.required);
+
+  // 특정 요일-슬롯의 가용 인원 계산
+  const availAt=(day,si)=>{
+    const key=`${day}-${si}`;
+    const reqOk=req.filter(m=>m.avail.has(key)).length;
+    const optOk=opt.filter(m=>m.avail.has(key)).length;
+    return {reqOk, optOk, total:reqOk+optOk};
+  };
+  const maxTotal = Math.max(1, ...DAYS.flatMap((d)=>SLOTS.map((s,si)=>availAt(d,si).total)));
+
+  const chosen = pick ? availAt(pick.day, pick.si) : null;
+  const confirmPick=()=>{
+    if(!pick) return;
+    const slot=SLOTS[pick.si];
+    const key=`${pick.day}-${pick.si}`;
+    const c=availAt(pick.day,pick.si);
+    setConfirmed({
+      day:pick.day, slot, key,
+      reqOk: req.filter(m=>m.avail.has(key)),
+      optOk: opt.filter(m=>m.avail.has(key)),
+      reqAll: c.reqOk===req.length,
+      reqTotal:req.length, optTotal:opt.length,
+      optMiss: opt.length-c.optOk,
+      prefReasons:[], score:0,
+    });
+    go("confirm");
+  };
+
+  return (
+    <>
+      <AppBar onBack={back}/>
+      <div className="screen fade">
+        <div className="pad">
+          <p className="eyebrow">주최자</p>
+          <h1 className="title">직접 시간을 골라요</h1>
+          <p className="sub">칸을 누르면 그 시간에 몇 명이 되는지 바로 보여드려요.</p>
+
+          <div className="mgrid-scroll">
+            <div className="mgrid">
+              <div className="mcell head"></div>
+              {DAYS.map(d=><div key={d} className="mcell head">{d}</div>)}
+              {SLOTS.map((s,si)=>(
+                <React.Fragment key={s}>
+                  <div className="mcell time">{slotLabel(s)}</div>
+                  {DAYS.map(d=>{
+                    const {total,reqOk}=availAt(d,si);
+                    const on = pick && pick.day===d && pick.si===si;
+                    const intensity = total/maxTotal; // 0~1
+                    return (
+                      <button key={d}
+                        className={"mcell slot"+(on?" on":"")}
+                        style={!on ? {background:`color-mix(in srgb, var(--blue) ${Math.round(intensity*100)}%, var(--bg-soft))`} : undefined}
+                        onClick={()=>setPick({day:d,si})}>
+                        <span className="mnum" style={{color: on ? "#fff" : (intensity>0.5?"#fff":"var(--ink-2)")}}>{total}</span>
+                      </button>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          <p className="mgrid-legend">숫자 = 그 시간에 가능한 전체 인원 · 진할수록 많아요</p>
+
+          {chosen && (
+            <div className="summary-card fade" style={{marginTop:20}}>
+              <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginBottom:8}}>선택한 시간</div>
+              <div className="big" style={{fontSize:20}}>{pick.day}요일 {slotLabel(SLOTS[pick.si])}</div>
+              <div className="reasons" style={{marginTop:14}}>
+                <div className={"reason "+(chosen.reqOk===req.length?"ok":"no")}>
+                  <span className="ic">{chosen.reqOk===req.length?"✓":"⚠️"}</span>
+                  <span>필수 {chosen.reqOk}명{chosen.reqOk===req.length?" 전원":` / ${req.length}명`} 가능</span>
+                </div>
+                <div className={"reason "+(chosen.optOk===opt.length?"ok":"no")}>
+                  <span className="ic">{chosen.optOk===opt.length?"✓":"⚠️"}</span>
+                  <span>선택 {chosen.optOk}명{chosen.optOk===opt.length?" 모두":` / ${opt.length}명`} 가능</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="footer">
+        <button className="btn" disabled={!pick} onClick={confirmPick}>
+          {pick ? `${pick.day}요일 ${slotLabel(SLOTS[pick.si])}로 정하기` : "시간을 먼저 골라주세요"}
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -1516,11 +1433,11 @@ function ScreenInvite({state,activeMember,go,back}){
           <p className="eyebrow">참석자</p>
           <h1 className="title">{host.name}님이<br/>회의 시간을 물어봐요</h1>
           <div className="summary-card" style={{marginTop:18}}>
-            <div className="big" style={{fontSize:19}}>{state.title}</div>
+            <div className="big" style={{fontSize:"var(--fs-input)"}}>{state.title}</div>
             <div className="meta">{state.duration} · 참석자 {state.members.length}명</div>
             <div style={{display:"flex",gap:8,marginTop:14}}>
               <span className="pill best">📅 {state.deadline}</span>
-              <span className="pill" style={{background:"var(--good-sub)",color:"var(--good)"}}>⚡ 30초면 끝나요</span>
+              <span className="pill" style={{background:"var(--good-sub)",color:"var(--good-ink)"}}>⚡ 30초면 끝나요</span>
             </div>
           </div>
           {me.responded &&
@@ -1545,15 +1462,37 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
     const k=`${d}-${si}`; const n=new Set(sel);
     n.has(k)?n.delete(k):n.add(k); setSel(n);
   };
-  const preset=(type)=>{
-    const n=new Set(sel);
+  // 각 프리셋이 대상으로 하는 셀 목록
+  const presetCells=(type)=>{
+    const out=[];
     DAYS.forEach(d=>SLOTS.forEach((s,si)=>{
       const k=`${d}-${si}`;
-      if(type==="am"&&s==="10:00")n.add(k);
-      if(type==="pm"&&s!=="10:00")n.add(k);
-      if(type==="nolunch"&&s!=="14:00")n.add(k);
+      if(type==="am"&&s==="10:00")out.push(k);
+      if(type==="pm"&&s!=="10:00")out.push(k);
+      if(type==="nolunch"&&s!=="14:00")out.push(k);
     }));
-    setSel(n);
+    return out;
+  };
+  // 프리셋이 "정확히" 현재 선택과 일치하면 active (= 다시 누르면 해제)
+  const presetActive=(type)=>{
+    const cells=presetCells(type);
+    if(cells.length===0) return false;
+    if(sel.size!==cells.length) return false;      // 개수부터 다르면 불일치
+    return cells.every(k=>sel.has(k));             // 셀이 정확히 일치
+  };
+  const preset=(type)=>{
+    if(presetActive(type)){ setSel(new Set()); return; }  // 이미 그 프리셋이면 → 전체 해제
+    setSel(new Set(presetCells(type)));                   // 아니면 → 덮어쓰기(라디오)
+  };
+  const totalCells = DAYS.length*SLOTS.length;
+  const allSelected = sel.size===totalCells;
+  const toggleAll=()=>{
+    if(allSelected){ setSel(new Set()); }
+    else{
+      const n=new Set();
+      DAYS.forEach(d=>SLOTS.forEach((s,si)=>n.add(`${d}-${si}`)));
+      setSel(n);
+    }
   };
   const next=()=>{ dispatch({type:"SET_AVAIL",id:me.id,avail:sel}); go("prefs"); };
 
@@ -1566,10 +1505,17 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
           <h1 className="title">언제 가능하세요?</h1>
           <p className="sub">되는 시간을 눌러주세요. 여러 개 골라도 돼요.</p>
 
-          <div className="chips" style={{marginBottom:18}}>
-            <button className="chip" onClick={()=>preset("am")}>오전만</button>
-            <button className="chip" onClick={()=>preset("pm")}>오후만</button>
-            <button className="chip" onClick={()=>preset("nolunch")}>점심 빼고</button>
+          <div className="chips" style={{marginBottom:12}}>
+            <button className={"chip"+(presetActive("am")?" on":"")} onClick={()=>preset("am")}>오전만</button>
+            <button className={"chip"+(presetActive("pm")?" on":"")} onClick={()=>preset("pm")}>오후만</button>
+            <button className={"chip"+(presetActive("nolunch")?" on":"")} onClick={()=>preset("nolunch")}>점심 빼고</button>
+          </div>
+
+          <div className="selectall-row">
+            <span className="selectall-count">{sel.size}/{totalCells}칸 선택됨</span>
+            <button className={"selectall-btn"+(allSelected?" on":"")} onClick={toggleAll}>
+              {allSelected ? "전체 해제" : "전체 선택"}
+            </button>
           </div>
 
           <div className="grid-scroll">
@@ -1685,15 +1631,7 @@ function ScreenAnon({activeMember,state,go,back}){
           <h1 className="title" style={{textAlign:"center"}}>당신의 선호는<br/>안전해요</h1>
           <p className="sub" style={{textAlign:"center"}}>누가 어떤 시간을 피하고 싶은지는<br/>아무에게도 안 보여요.</p>
 
-          <div className="scatter">
-            <div className="name-tag">{me.name}</div>
-            <div className="dots-anon">
-              <div className="anon-dot">?</div><div className="anon-dot">?</div>
-              <div className="anon-dot">?</div><div className="anon-dot">?</div>
-            </div>
-          </div>
-
-          <div className="summary-card">
+          <div className="summary-card" style={{marginTop:20}}>
             <div style={{fontSize:12,fontWeight:800,color:"var(--ink-3)",marginBottom:8}}>주최자에게는 이렇게만 보여요</div>
             <div style={{fontSize:17,fontWeight:800}}>
               {state.members.length}명 중 {lunch||3}명이<br/>점심 직후를 피하고 싶어해요</div>
@@ -1710,7 +1648,7 @@ function ScreenAnon({activeMember,state,go,back}){
 }
 
 /* ── 10 완료 (참석자) ── */
-function ScreenDone({activeMember,state,reset}){
+function ScreenDone({activeMember,state,reset,go}){
   const me=state.members[activeMember];
   return (
     <div className="screen fade">
@@ -1721,7 +1659,7 @@ function ScreenDone({activeMember,state,reset}){
         <h1 className="title" style={{textAlign:"center"}}>다 알려줬어요,<br/>고마워요</h1>
         <p className="sub" style={{textAlign:"center"}}>
           시간이 정해지면 바로 알림을 보낼게요.<br/>그때까지 신경 안 쓰셔도 돼요.</p>
-        <button className="linkbtn" style={{marginTop:6}}>입력을 바꾸고 싶으면 여기를 눌러요</button>
+        <button className="linkbtn" style={{marginTop:6}} onClick={()=>go("availability")}>입력을 바꾸고 싶으면 여기를 눌러요</button>
         <button className="btn ghost" style={{marginTop:24}} onClick={()=>reset("dashboard")}>
           주최자 화면으로 (데모)</button>
       </div>
