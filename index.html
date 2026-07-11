@@ -589,7 +589,7 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
   /* 참석자 플로우: 하단 스위처(약 92px) 위로 footer를 띄운다 */
   .phone.has-switcher .footer{ bottom:92px; }
-  .phone.has-switcher .pad{ padding-bottom:212px; }
+  .phone.has-switcher .pad{ padding-bottom:236px; }
   .btn{
     width:100%; border:none; border-radius:16px; padding:19px; font-size:17px; font-weight:800;
     font-family:var(--font); cursor:pointer; transition:transform .1s, background .15s;
@@ -731,6 +731,11 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .anon{
     background:var(--anon-bg); color:var(--anon-ink); border-radius:14px; padding:13px 16px; font-size:13.5px; font-weight:700;
     display:flex; align-items:center; gap:8px; position:sticky; top:0; z-index:20; margin-bottom:6px;
+  }
+  .anon-foot{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    color:var(--ink-3); font-size:12.5px; font-weight:700;
+    margin-bottom:10px; letter-spacing:-.2px;
   }
 
   /* ── 선호 칩(세로) ── */
@@ -1866,8 +1871,7 @@ function ScreenPrefs({state,dispatch,activeMember,go,back}){
       <AppBar onBack={back} right={<span style={{fontSize:12,fontWeight:800,color:"var(--ink-3)"}}>2/2단계</span>}/>
       <div className="screen fade">
         <div className="pad">
-          <div className="anon">🔒 고른 선호는 이름 없이 반영돼요</div>
-          <p className="eyebrow" style={{marginTop:16}}>{me.name} · 참석자</p>
+          <p className="eyebrow" style={{marginTop:4}}>{me.name} · 참석자</p>
           <h1 className="title">혹시 피하고 싶은<br/>시간이 있나요?</h1>
           <p className="sub">있으면 골라주세요. 없어도 괜찮아요.</p>
 
@@ -1895,6 +1899,7 @@ function ScreenPrefs({state,dispatch,activeMember,go,back}){
         </div>
       </div>
       <div className="footer">
+        <div className="anon-foot">🔒 고른 선호는 이름 없이 반영돼요</div>
         <button className="btn" onClick={finish}>완료</button>
       </div>
     </>
