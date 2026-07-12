@@ -716,10 +716,6 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
     height:40px; cursor:pointer; border:1.5px solid transparent; transition:all .1s; }
   .gcell.slot.on{ background:var(--blue); color:#fff; }  /* solid — 패턴을 덮음 */
   .gcell.slot:active{ transform:scale(.9); }
-  /* 점심시간 구분선(비대화형, 전열 스팬) */
-  .lunch-div{ grid-column:1 / -1; height:24px; font-size:11px; color:var(--ink-3); font-weight:700;
-    display:flex; align-items:center; justify-content:center; gap:6px; background:transparent;
-    border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
 
   /* ── 직접 찾기 그리드(가용 인원 히트맵) ── */
   .mgrid-scroll{ overflow-x:auto; padding-bottom:6px; margin-top:4px; }
@@ -836,31 +832,31 @@ const { useReducer, useState, useEffect, useRef } = React;
 
 /* ═══════════════════════════════════════════════════════════
    MOCK 데이터 — 과제 시나리오 프리셋
-   6명(필수3/선택3), 다음 주 월~금, 오전9·10·11 / 오후2·3·4·5 슬롯(점심 12–13시 제외)
+   6명(필수3/선택3), 다음 주 월~금, 오전9·10·11 / 오후1·2·3·4·5 슬롯(12시만 제외)
    ═══════════════════════════════════════════════════════════ */
 const DAYS = ["월","화","수","목","금"];
-// 인덱스: 0=09,1=10,2=11,3=14,4=15,5=16,6=17시 (12·13시는 점심으로 제외)
-const SLOTS = ["09:00","10:00","11:00","14:00","15:00","16:00","17:00"];
+// 인덱스: 0=09,1=10,2=11,3=13,4=14,5=15,6=16,7=17시 (12시만 제외)
+const SLOTS = ["09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"];
 const AV = ["#F04452","#3182F6","#15B76E","#F0A500","#8B5CF6","#00C2D6"];
 
 // 각 참석자: 가용시간(요일-슬롯 인덱스 세트), 선호(prefs), 필수여부, 응답완료
-// 슬롯 확장(4→7): 기존 시나리오의 실제 시간대를 새 인덱스로 이관(의미 불변) + 외곽대 일부 채움.
+// 슬롯 8개: 기존 시나리오의 실제 시간대 유지(의미 불변). 13:00 추가로 14시 이후 인덱스만 +1.
 // 필수 3인 전원 겹침 = 화15:00 / 금15:00 / 목10:00 유지 → 추천 상위3 순위 v2와 동일.
 const initialMembers = [
   { id:0, name:"민지", role:"주최자·PM", color:AV[0], required:true,  responded:true,
-    avail: cells([["월",2],["월",3],["월",4],["화",4],["화",5],["수",3],["목",1],["금",4],["금",5],["금",6]]),
+    avail: cells([["월",2],["월",4],["월",5],["화",5],["화",6],["수",4],["목",1],["금",5],["금",6],["금",7]]),
     prefs:["lunch"] },
   { id:1, name:"준호", role:"백엔드", color:AV[1], required:true, responded:true,
-    avail: cells([["화",4],["화",5],["화",6],["수",4],["목",1],["목",3],["금",4]]),
+    avail: cells([["화",5],["화",6],["화",7],["수",5],["목",1],["목",4],["금",5]]),
     prefs:["lunch","morning"] },
   { id:2, name:"서연", role:"디자이너", color:AV[2], required:true, responded:true,
-    avail: cells([["화",3],["화",4],["수",3],["수",4],["수",6],["목",1],["금",4],["금",5]]),
+    avail: cells([["화",4],["화",5],["수",4],["수",5],["수",7],["목",1],["금",5],["금",6]]),
     prefs:[] },
   { id:3, name:"도현", role:"프론트", color:AV[3], required:false, responded:true,
-    avail: cells([["화",4],["수",0],["수",4],["목",1],["목",3]]),
+    avail: cells([["화",5],["수",0],["수",5],["목",1],["목",4]]),
     prefs:["outwork:목,금"] }, // 목·금 외근
   { id:4, name:"수빈", role:"마케터", color:AV[4], required:false, responded:true,
-    avail: cells([["화",0],["화",4],["화",5],["수",3],["금",4],["금",6]]),
+    avail: cells([["화",0],["화",5],["화",6],["수",4],["금",5],["금",7]]),
     prefs:["lunch"] },
   { id:5, name:"지훈", role:"데이터", color:AV[5], required:false, responded:false,
     avail: new Set(), prefs:[] }, // ← 심사자가 마지막으로 채울 사람
@@ -1781,7 +1777,7 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
       const h=parseInt(s);
       if(type==="am"&&h<12)out.push(k);          // 오전만: 09·10·11시
       if(type==="pm"&&h>=12)out.push(k);         // 오후만: 14·15·16·17시
-      if(type==="nolunch"&&s!=="14:00")out.push(k); // 점심 빼고: 점심 직후 14시 제외
+      if(type==="nolunch"&&s!=="13:00"&&s!=="14:00")out.push(k); // 점심 빼고: 점심 직후 13·14시 제외
     }));
     return out;
   };
@@ -1841,7 +1837,6 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
                     const on=sel.has(`${d}-${si}`);
                     return <div key={d} className={"gcell slot"+(on?" on":"")} onClick={()=>toggle(d,si)}>{on?"✓":""}</div>;
                   })}
-                  {s==="11:00" && <div className="lunch-div">🍽 점심시간</div>}
                 </React.Fragment>
               ))}
             </div>
