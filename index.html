@@ -1155,7 +1155,14 @@ function App(){
     dark:   { icon:"🌙", label:"다크 모드 (탭하면 시스템 설정으로)" },
   };
 
-  const showToast = (t)=>{ setToast(t); setTimeout(()=>setToast(""), 1900); };
+  const [toastBottom, setToastBottom] = useState(120);
+  const showToast = (t)=>{
+    const footer = document.querySelector(".phone .footer");
+    const phone = footer && footer.offsetParent;   // .phone
+    setToastBottom(phone ? (phone.offsetHeight - footer.offsetTop + 16) : 40);
+    setToast(t);
+    setTimeout(()=>setToast(""), 1900);
+  };
 
   const respondedCount = state.members.filter(m=>m.responded).length;
   const recs = recommend(state.members);
@@ -1191,7 +1198,7 @@ function App(){
       {hasSwitcher &&
         <Switcher {...{state,activeMember,setActiveMember,reset}}/>}
 
-      <div className={"toast"+(toast?" show":"")}>{toast}</div>
+      <div className={"toast"+(toast?" show":"")} style={{bottom: toastBottom}}>{toast}</div>
     </div>
     <DemoPanel {...{dispatch, go, setActiveMember, reset}}/>
     </div>
