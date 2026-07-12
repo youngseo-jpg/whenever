@@ -711,9 +711,7 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   .gcell.head, .gcell.time{ height:24px; }  /* 헤더/시간 라벨은 비대화형이라 낮게 */
   .gcell.head{ color:var(--ink-3); font-weight:800; }
   .gcell.time{ color:var(--ink-3); font-size:10px; white-space:nowrap; }
-  /* 미선택 셀: bg-soft 바탕 + 45도 대각선 패턴(색각이상 사용자용 색 외 단서) */
-  .gcell.slot{ background:repeating-linear-gradient(45deg, var(--line) 0, var(--line) 1px, var(--bg-soft) 1px, var(--bg-soft) 2px);
-    height:40px; cursor:pointer; border:1.5px solid transparent; transition:all .1s; }
+  .gcell.slot{ background:var(--bg-soft); height:40px; cursor:pointer; border:1.5px solid transparent; transition:all .1s; }
   .gcell.slot.on{ background:var(--blue); color:#fff; }  /* solid — 패턴을 덮음 */
   .gcell.slot:active{ transform:scale(.9); }
 
@@ -1776,8 +1774,7 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
       const k=`${d}-${si}`;
       const h=parseInt(s);
       if(type==="am"&&h<12)out.push(k);          // 오전만: 09·10·11시
-      if(type==="pm"&&h>=12)out.push(k);         // 오후만: 14·15·16·17시
-      if(type==="nolunch"&&s!=="13:00"&&s!=="14:00")out.push(k); // 점심 빼고: 점심 직후 13·14시 제외
+      if(type==="pm"&&h>=12)out.push(k);         // 오후만: 13·14·15·16·17시
     }));
     return out;
   };
@@ -1816,7 +1813,6 @@ function ScreenAvailability({state,dispatch,activeMember,go,back}){
           <div className="chips" style={{marginBottom:12}}>
             <button className={"chip"+(presetActive("am")?" on":"")} onClick={()=>preset("am")}>오전만</button>
             <button className={"chip"+(presetActive("pm")?" on":"")} onClick={()=>preset("pm")}>오후만</button>
-            <button className={"chip"+(presetActive("nolunch")?" on":"")} onClick={()=>preset("nolunch")}>점심 빼고</button>
           </div>
 
           <div className="selectall-row">
