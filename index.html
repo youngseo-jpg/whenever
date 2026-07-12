@@ -854,9 +854,8 @@ const initialMembers = [
   { id:3, name:"도현", role:"프론트", color:AV[3], required:false, responded:true,
     avail: cells([["화",5],["수",0],["수",5],["목",1],["목",4]]),
     prefs:["outwork:목,금"] }, // 목·금 외근
-  { id:4, name:"수빈", role:"마케터", color:AV[4], required:false, responded:true,
-    avail: cells([["화",0],["화",5],["화",6],["수",4],["금",5],["금",7]]),
-    prefs:["lunch"] },
+  { id:4, name:"수빈", role:"마케터", color:AV[4], required:false, responded:false,
+    avail: new Set(), prefs:[] }, // ← 심사자가 채울 사람 (지훈과 함께)
   { id:5, name:"지훈", role:"데이터", color:AV[5], required:false, responded:false,
     avail: new Set(), prefs:[] }, // ← 심사자가 마지막으로 채울 사람
 ];
@@ -988,9 +987,13 @@ function reducer(state, action){
       return {...state, members};
     }
     case "RESPOND_ALL": {
-      // 심사자용: 지훈까지 그럴듯한 응답으로 채움
-      const members = state.members.map(m=> m.id===5
-        ? {...m, responded:true, avail:cells([["화",2],["수",2],["목",0],["금",2]]), prefs:["morning"]}
+      // 심사자용: 미응답자(수빈·지훈)를 그럴듯한 응답으로 채움
+      const fill = {
+        4: { avail: cells([["화",0],["화",5],["화",6],["수",4],["금",5],["금",7]]), prefs:["lunch"] },
+        5: { avail: cells([["화",2],["수",2],["목",0],["금",2]]), prefs:["morning"] },
+      };
+      const members = state.members.map(m=> fill[m.id]
+        ? {...m, responded:true, ...fill[m.id]}
         : {...m, responded:true});
       return {...state, members};
     }
